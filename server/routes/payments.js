@@ -10,20 +10,17 @@ import User from "../models/User.js";
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// payments.js (you need to share this file)
+// Make sure you're passing metadata correctly like this:
+
 router.post("/create-checkout-session", protect, async (req, res) => {
+  const { courseId } = req.body;
+  const userId = req.user._id; // From protect middleware
+
   try {
-    const { courseId } = req.body;
-    if (!courseId) return res.status(400).json({ message: "Course ID required" });
-
     const course = await Course.findById(courseId);
-    if (!course) return res.status(404).json({ message: "Course not found" });
-
-    // Prevent enrolling twice by checking enrolledCourses array
-    const user = req.user;
-    if (user.enrolledCourses?.includes(course._id.toString())) {
-      return res
-        .status(400)
-        .json({ message: "You are already enrolled in this course" });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -32,27 +29,34 @@ router.post("/create-checkout-session", protect, async (req, res) => {
         {
           price_data: {
             currency: "usd",
-            product_data: { name: course.title },
-            unit_amount: Math.round(parseFloat(course.price) * 100),
+            product_data: {
+              name: course.title,
+              description: course.description,
+            },
+            unit_amount: course.price * 100, // Stripe uses cents
           },
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.LEARNHUB_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.CLIENT_URL}/courses/${course._id}`,
+      // ✅ THIS IS CRITICAL - Make sure metadata is set correctly
       metadata: {
-        userId: user._id.toString(),
-        courseId: course._id.toString(),
+        userId: userId.toString(), // Convert ObjectId to string
+        courseId: courseId.toString(), // Convert ObjectId to string
       },
+      success_url: `${process.env.CLIENT_URL}/courses/${courseId}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/courses/${courseId}`,
     });
+
+    console.log("✅ Checkout session created:", session.id);
+    console.log("📋 Metadata:", session.metadata);
 
     res.json({ url: session.url });
   } catch (err) {
-    console.error("Stripe session error:", err.message);
-    res.status(500).json({ message: err.message });
+    console.error("❌ Error creating checkout session:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
-});
+});;
 
 
 router.get("/verify-session", protect, async (req, res) => {

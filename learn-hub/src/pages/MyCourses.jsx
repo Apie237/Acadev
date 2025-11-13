@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import api from "../utils/api";
 import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 
 export default function MyCourses() {
   const { user } = useContext(AuthContext);
@@ -14,12 +14,29 @@ export default function MyCourses() {
     const fetchCourses = async () => {
       try {
         const token = localStorage.getItem("token");
+
         const res = await api.get(`/users/${user._id}/enrolled`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setCourses(res.data);
+
+
+        const coursesWithProgress = await Promise.all(
+          res.data.map(async (course) => {
+            const progressRes = await api.get(`/progress/${course._id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            return {
+              ...course,
+              progressPercentage: progressRes.data.progressPercentage || 0,
+            };
+          })
+        );
+
+        setCourses(coursesWithProgress);
       } catch (err) {
-        console.error("Failed to load enrolled courses:", err);
+        console.error("❌ Error fetching enrolled courses:", err);
       } finally {
         setLoading(false);
       }
@@ -28,14 +45,14 @@ export default function MyCourses() {
     fetchCourses();
   }, [user]);
 
-  if (loading) return <p>Loading your courses...</p>;
+  if (loading) return <p className="p-6">Loading your courses...</p>;
 
   if (courses.length === 0)
     return (
       <div className="text-center mt-10">
         <p className="text-gray-500 mb-4">You haven’t enrolled in any courses yet.</p>
         <Link
-          to="http://localhost:5173/" // client homepage
+          to="/"
           className="bg-green-600 text-white px-4 py-2 rounded"
         >
           Browse Courses
@@ -44,7 +61,7 @@ export default function MyCourses() {
     );
 
   return (
-    <div>
+    <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">My Courses</h2>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -60,8 +77,22 @@ export default function MyCourses() {
             />
             <h3 className="font-semibold text-lg">{course.title}</h3>
             <p className="text-sm text-gray-600 mb-3">{course.category}</p>
+
+            {/* Progress bar */}
+            <div className="mb-3">
+              <div className="w-full bg-gray-200 h-2 rounded">
+                <div
+                  className="bg-green-500 h-2 rounded"
+                  style={{ width: `${course.progressPercentage}%` }}
+                />
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                {Math.round(course.progressPercentage)}% Complete
+              </p>
+            </div>
+
             <Link
-              to={`/lessons?course=${course._id}`}
+              to={`/courses/${course._id}`}
               className="inline-block bg-green-600 text-white px-3 py-2 rounded-md text-sm"
             >
               Continue Learning

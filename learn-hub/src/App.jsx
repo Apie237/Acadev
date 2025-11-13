@@ -1,45 +1,31 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
-import { AuthProvider } from "./context/AuthContext";
-
 import Dashboard from "./pages/Dashboard";
 import MyCourses from "./pages/MyCourses";
-import Lessons from "./pages/Lessons";
-import Progress from "./pages/Progress";
-import Quizzes from "./pages/Quizzes";
-import Certificates from "./pages/Certificates";
-import Events from "./pages/Events";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
+import LessonPlayer from "./pages/LessonPlayer";
+import MyProgress from "./pages/MyProgress";
 
-const App = () => {
+export default function App() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   return (
-    <AuthProvider>
-      <Router>
-        <div className="flex">
-          <Sidebar />
-          <div className="flex-1">
-            <Navbar />
-            <main className="p-6">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/login" element={<Login/>} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/my-courses" element={<MyCourses />} />
-                <Route path="/lessons" element={<Lessons />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/quizzes" element={<Quizzes />} />
-                <Route path="/certificates" element={<Certificates />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="*" element={<Login />} />
-              </Routes>
-            </main>
-          </div>
-        </div>
-      </Router>
-    </AuthProvider>
-  );
-};
+    <div className="flex">
+      <Sidebar onLogout={handleLogout} />
 
-export default App;
+      <main className="flex-1 p-6 bg-gray-100 min-h-screen">
+        <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/my-courses" element={<MyCourses />} />
+          <Route path="/courses/:courseId" element={<LessonPlayer />} />
+          <Route path="/progress" element={<MyProgress />} />
+          <Route path="/settings" element={<p>Settings page coming soon...</p>} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
