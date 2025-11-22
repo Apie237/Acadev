@@ -8,10 +8,13 @@ dotenv.config();
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Keep express.raw() HERE in the route handler
 router.post(
   "/",
   express.raw({ type: "application/json" }),
   async (req, res) => {
+    console.log("\n🎯 ========== WEBHOOK RECEIVED ==========");
+    
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -21,71 +24,83 @@ router.post(
         sig,
         process.env.STRIPE_WEBHOOK_SECRET
       );
-      console.log("✅ Webhook event received:", event.type);
+      console.log("✅ Webhook signature verified");
+      console.log("📧 Event type:", event.type);
     } catch (err) {
-      console.error("⚠️ Webhook signature verification failed:", err.message);
+      console.error("❌ Webhook signature verification failed:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // ✅ Handle successful payment event
+    console.log("📦 Event received:", event.type);
+
     if (event.type === "checkout.session.completed") {
+      console.log("\n💳 CHECKOUT SESSION COMPLETED - Starting enrollment");
+      
       const session = event.data.object;
       
-      // 🔍 LOG EVERYTHING
-      console.log("📦 Full session object:", JSON.stringify(session, null, 2));
-      console.log("🔑 Session metadata:", session.metadata);
-      console.log("👤 User ID from metadata:", session.metadata?.userId);
-      console.log("📚 Course ID from metadata:", session.metadata?.courseId);
+      console.log("🔑 Metadata:", session.metadata);
 
       const userId = session.metadata?.userId;
       const courseId = session.metadata?.courseId;
 
+      console.log("👤 UserId from metadata:", userId);
+      console.log("📚 CourseId from metadata:", courseId);
+
       if (!userId || !courseId) {
-        console.error("❌ Missing metadata in session");
-        console.error("Session ID:", session.id);
-        console.error("Available metadata:", session.metadata);
+        console.error("❌ CRITICAL: Missing metadata in session");
         return res.status(400).send("Missing metadata");
       }
 
       try {
-        console.log(`🔍 Looking for user: ${userId}`);
+        console.log("🔍 Looking up user with ID:", userId);
         const user = await User.findById(userId);
         
-        console.log(`🔍 Looking for course: ${courseId}`);
+        console.log("🔍 Looking up course with ID:", courseId);
         const course = await Course.findById(courseId);
 
         if (!user) {
-          console.error("❌ User not found:", userId);
+          console.error("❌ User not found in database:", userId);
           return res.status(404).send("User not found");
         }
         
         if (!course) {
-          console.error("❌ Course not found:", courseId);
+          console.error("❌ Course not found in database:", courseId);
           return res.status(404).send("Course not found");
         }
 
         console.log("✅ User found:", user.email);
         console.log("✅ Course found:", course.title);
-        console.log("📋 Current enrolled courses:", user.enrolledCourses);
+        console.log("📚 User's current enrolled courses:", user.enrolledCourses);
 
-        // Only enroll if not already enrolled
-        if (!user.enrolledCourses.some(id => id.equals(course._id))) {
+        // Check if already enrolled
+        const alreadyEnrolled = user.enrolledCourses.some(id => 
+          id.toString() === course._id.toString()
+        );
+
+        if (!alreadyEnrolled) {
+          console.log("➕ Adding course to user's enrolled courses");
           user.enrolledCourses.push(course._id);
+          
+          console.log("💾 Saving user...");
           await user.save();
-          console.log(`✅ User ${user.email} enrolled in ${course.title}`);
-          console.log("📋 Updated enrolled courses:", user.enrolledCourses);
+          
+          console.log("✅✅✅ SUCCESS: User enrolled in course!");
+          console.log("📚 Updated enrolled courses:", user.enrolledCourses);
         } else {
-          console.log(`⚠️ User ${user.email} already enrolled in ${course.title}`);
+          console.log("⚠️ User already enrolled in this course");
         }
+
+        return res.status(200).json({ received: true, enrolled: true });
+
       } catch (err) {
-        console.error("❌ Error enrolling user via webhook:", err);
-        console.error("Error details:", err.message);
+        console.error("❌❌❌ CRITICAL ERROR during enrollment:", err);
+        console.error("Error message:", err.message);
         console.error("Error stack:", err.stack);
+        return res.status(500).json({ error: "Failed to enroll user", details: err.message });
       }
-    } else {
-      console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
 
+    console.log("✅ Webhook processed (non-checkout event)");
     res.status(200).json({ received: true });
   }
 );

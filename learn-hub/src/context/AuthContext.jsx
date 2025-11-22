@@ -17,8 +17,16 @@ export const AuthProvider = ({ children }) => {
 
     api
       .get("/users/me", { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => setUser(res.data))
-      .catch(() => setUser(null))
+      .then((res) => {
+        console.log("✅ User fetched in AuthContext:", res.data);
+        setUser(res.data);
+      })
+      .catch((err) => {
+        console.error("❌ Failed to fetch user:", err.response?.data || err.message);
+        // Clear invalid token
+        localStorage.removeItem("token");
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
