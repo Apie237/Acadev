@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import api from '../utils/api.js';
+import AcadevoLoader from './AcadevoLoader.jsx';
 
 const CourseSection = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -11,7 +12,6 @@ const CourseSection = () => {
   const [showAll, setShowAll] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch courses from API
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -28,22 +28,18 @@ const CourseSection = () => {
     fetchCourses();
   }, []);
 
-  // Extract unique categories from courses
   const categories = ['All', ...new Set(courses.map(course => course.category))];
 
-  // Filter courses by category
   const filteredCourses = activeFilter === 'All' 
     ? courses 
     : courses.filter(course => course.category === activeFilter);
 
-  // Show only 4 courses initially unless "showAll" is true
   const displayedCourses = showAll ? filteredCourses : filteredCourses.slice(0, 4);
 
-  // Calculate course duration from lessons
   const getCourseDuration = (lessons) => {
     if (!lessons || lessons.length === 0) return 'Self-paced';
     const totalHours = lessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0);
-    const months = Math.ceil(totalHours / 40); // Assuming 40 hours per month
+    const months = Math.ceil(totalHours / 40);
     return months > 0 ? `${months} Month${months > 1 ? 's' : ''}` : 'Self-paced';
   };
 
@@ -55,23 +51,15 @@ const CourseSection = () => {
     navigate(`/courses/${courseId}`);
   };
 
-  if (loading) {
-    return (
-      <div className="w-full bg-gray-50 py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-xl text-gray-600">Loading programs...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <AcadevoLoader/>
 
   return (
-    <div className="w-full bg-gray-50 py-16 px-4">
+    <div className="w-full bg-gradient-to-br from-gray-50 to-gray-100 py-16 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-indigo-600 font-semibold mb-2">Acadevo Programs</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
+          <p className="text-[#48ADB7] font-semibold mb-2 text-lg">Acadevo Programs</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-[#1F2937] mb-8">
             Most Popular Programs
           </h2>
 
@@ -82,12 +70,12 @@ const CourseSection = () => {
                 key={category}
                 onClick={() => {
                   setActiveFilter(category);
-                  setShowAll(false); // Reset to show only 4 when changing filter
+                  setShowAll(false);
                 }}
                 className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                   activeFilter === category
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:border-indigo-400'
+                    ? 'bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white shadow-lg'
+                    : 'bg-white text-[#1F2937] border border-gray-300 hover:border-[#48ADB7] hover:text-[#48ADB7]'
                 }`}
               >
                 {category}
@@ -106,7 +94,7 @@ const CourseSection = () => {
             {displayedCourses.map((course) => (
               <div
                 key={course._id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
               >
                 {/* Thumbnail */}
                 <div className="relative h-48 overflow-hidden bg-gray-200">
@@ -117,14 +105,14 @@ const CourseSection = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-500">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#409891] to-[#48ADB7]">
                       <span className="text-white text-4xl font-bold">
                         {course.title.charAt(0)}
                       </span>
                     </div>
                   )}
                   {!course.published && (
-                    <span className="absolute top-3 left-3 bg-yellow-400 text-gray-900 text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="absolute top-3 left-3 bg-yellow-400 text-[#1F2937] text-xs font-semibold px-3 py-1 rounded-full">
                       Coming soon
                     </span>
                   )}
@@ -132,7 +120,7 @@ const CourseSection = () => {
 
                 {/* Content */}
                 <div className="p-5">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="text-xl font-bold text-[#1F2937] mb-2 line-clamp-2">
                     {course.title}
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
@@ -142,13 +130,13 @@ const CourseSection = () => {
                   {/* Buttons */}
                   <button 
                     onClick={() => handleRegisterInterest(course._id)}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg mb-3 transition-colors duration-300"
+                    className="w-full bg-gradient-to-r from-[#409891] to-[#48ADB7] hover:from-[#48ADB7] hover:to-[#409891] text-white font-semibold py-3 rounded-xl mb-3 transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     Register Interest
                   </button>
                   <button 
                     onClick={() => handleLearnMore(course._id)}
-                    className="w-full text-indigo-600 font-semibold hover:text-indigo-700 transition-colors duration-300"
+                    className="w-full text-[#48ADB7] font-semibold hover:text-[#409891] transition-colors duration-300"
                   >
                     Learn more
                   </button>
@@ -163,7 +151,7 @@ const CourseSection = () => {
           {!showAll && filteredCourses.length > 4 && (
             <button
               onClick={() => setShowAll(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-full flex items-center justify-center gap-2 transition-colors duration-300"
+              className="bg-gradient-to-r from-[#409891] to-[#48ADB7] hover:from-[#48ADB7] hover:to-[#409891] text-white font-semibold px-8 py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
             >
               Show {filteredCourses.length - 4} more
               <ArrowRight size={20} />
@@ -171,7 +159,7 @@ const CourseSection = () => {
           )}
           <button 
             onClick={() => navigate('/courses')}
-            className="bg-white hover:bg-gray-50 text-indigo-600 border-2 border-indigo-600 font-semibold px-8 py-3 rounded-full flex items-center justify-center gap-2 transition-colors duration-300"
+            className="bg-white hover:bg-gray-50 text-[#48ADB7] border-2 border-[#48ADB7] hover:border-[#409891] hover:text-[#409891] font-semibold px-8 py-3 rounded-full flex items-center justify-center gap-2 transition-all duration-300"
           >
             View All Programs
             <ArrowRight size={20} />

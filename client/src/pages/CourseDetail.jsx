@@ -51,7 +51,7 @@ const CourseDetail = () => {
     }
   }, [id, searchParams, navigate]);
 
-  const learnHubUrl = "http://localhost:5174";
+  const learnHubUrl = "https://learnhubacadevo.vercel.app";
 
   const handleGoToDashboard = () => {
     const token = localStorage.getItem("token");

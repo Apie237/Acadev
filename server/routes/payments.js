@@ -47,7 +47,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
         userId: userId.toString(),
         courseId: courseId.toString(),
       },
-      success_url: `${process.env.CLIENT_URL}/courses/${courseId}?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.LEARNHUB_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/courses/${courseId}`,
     });
 
