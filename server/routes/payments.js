@@ -37,7 +37,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
               description: course.description,
               images: course.thumbnail || course.imageUrl ? [course.thumbnail || course.imageUrl] : [],
             },
-            unit_amount: priceInCents,
+            unit_amount: priceInCents, // ✅ Now properly rounded integer
           },
           quantity: 1,
         },
@@ -47,7 +47,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
         userId: userId.toString(),
         courseId: courseId.toString(),
       },
-      success_url: `${process.env.CLIENT_URL}/courses/${courseId}?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.LEARNHUB_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/courses/${courseId}`,
     });
 
@@ -61,7 +61,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
   }
 });
 
-// ✅ SIMPLIFIED: Just verify payment, let webhook handle enrollment
+// In payments.js - SIMPLIFIED verify-session
 router.get("/verify-session", protect, async (req, res) => {
   try {
     const { session_id } = req.query;
@@ -73,9 +73,9 @@ router.get("/verify-session", protect, async (req, res) => {
     const session = await stripe.checkout.sessions.retrieve(session_id);
 
     if (session.payment_status === "paid") {
-      // ✅ Just return success - webhook handles enrollment
+      // ✅ Just return success - let webhook handle enrollment
       res.json({ 
-        message: "Payment verified! Enrollment in progress...",
+        message: "Payment verified! Enrolling you now...",
         enrolled: true,
         courseId: session.metadata.courseId
       });
