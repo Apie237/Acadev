@@ -10,90 +10,60 @@ const CourseDetail = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [enrollmentPending, setEnrollmentPending] = useState(false);
 
   // Fetch user data
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return null;
+    if (!token) return;
     try {
       const res = await api.get("/users/me", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);
-      return res.data;
     } catch (err) {
       console.error("❌ Failed to fetch user:", err);
-      return null;
     }
   };
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        const res = await api.get(`/courses/${id}`);
-        setCourse(res.data);
-      } catch (err) {
-        console.error("❌ Failed to fetch course:", err);
-      }
-    };
-
-    fetchCourse();
-    fetchUser();
-
-    // ✅ Check if returning from Stripe checkout
-    const sessionId = searchParams.get("session_id");
-    if (sessionId) {
-      console.log("🔄 Payment successful! Waiting for enrollment...");
-      setEnrollmentPending(true);
-      
-      let attempts = 0;
-      const maxAttempts = 10;
-      
-      const checkEnrollment = setInterval(async () => {
-        attempts++;
-        console.log(`🔍 Checking enrollment status (${attempts}/${maxAttempts})...`);
-        
-        const userData = await fetchUser();
-        
-        // Check if enrolled
-        const isNowEnrolled = userData?.enrolledCourses?.some((c) => c._id === id || c === id);
-        
-        if (isNowEnrolled) {
-          clearInterval(checkEnrollment);
-          setEnrollmentPending(false);
-          console.log("✅ Enrollment confirmed!");
-          
-          // Show success message
-          alert("✅ Enrollment successful! Redirecting to LearnHub...");
-          
-          // Remove session_id from URL
-          searchParams.delete("session_id");
-          navigate(`/courses/${id}`, { replace: true });
-          
-          // Redirect to dashboard after delay
-          setTimeout(() => {
-            handleGoToDashboard();
-          }, 1500);
-        }
-        
-        if (attempts >= maxAttempts) {
-          clearInterval(checkEnrollment);
-          setEnrollmentPending(false);
-          console.log("⏰ Enrollment check timeout");
-          
-          // Remove session_id from URL
-          searchParams.delete("session_id");
-          navigate(`/courses/${id}`, { replace: true });
-          
-          alert("⚠️ Enrollment is taking longer than expected. Please check your dashboard or contact support.");
-        }
-      }, 2000);
-      
-      // Cleanup interval on unmount
-      return () => clearInterval(checkEnrollment);
+  // In CourseDetail.js
+useEffect(() => {
+  const fetchCourse = async () => {
+    try {
+      const res = await api.get(`/courses/${id}`);
+      setCourse(res.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch course:", err);
     }
-  }, [id, searchParams, navigate]);
+  };
+
+  fetchCourse();
+  fetchUser();
+
+  // ✅ FIXED: Wait longer for webhook to process
+  const sessionId = searchParams.get("session_id");
+  if (sessionId) {
+    console.log("🔄 Payment successful! Waiting for enrollment...");
+    
+    // ✅ Poll for enrollment status instead of single refetch
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const checkEnrollment = setInterval(async () => {
+      attempts++;
+      console.log(`🔍 Checking enrollment status (${attempts}/${maxAttempts})...`);
+      
+      await fetchUser();
+      
+      if (attempts >= maxAttempts) {
+        clearInterval(checkEnrollment);
+        console.log("⏰ Enrollment check timeout");
+      }
+    }, 2000); // Check every 2 seconds
+    
+    // Clean up interval on unmount
+    return () => clearInterval(checkEnrollment);
+  }
+}, [id]);
 
   const learnHubUrl = "https://learnhubacadevo.vercel.app";
 
@@ -145,7 +115,7 @@ const CourseDetail = () => {
     );
   }
 
-  const alreadyEnrolled = user?.enrolledCourses?.some((c) => c._id === course._id || c === course._id);
+  const alreadyEnrolled = user?.enrolledCourses?.some((c) => c._id === course._id);
 
   // Default features if none provided
   const programFeatures = course.features || [
@@ -360,42 +330,22 @@ const CourseDetail = () => {
               </div>
 
               {/* Enrollment Status */}
-              {enrollmentPending ? (
-                <div className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-2 border-blue-500 rounded-xl p-5 mb-6">
-                  <div className="flex items-center gap-3 text-[#2d6b66]">
-                    <div className="w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="font-bold text-lg">Processing enrollment...</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2 ml-9">
-                    Please wait while we confirm your enrollment
-                  </p>
-                </div>
-              ) : alreadyEnrolled ? (
+              {alreadyEnrolled && (
                 <div className="bg-gradient-to-r from-[#00d9a3]/20 to-[#00c490]/20 border-2 border-[#00d9a3] rounded-xl p-5 mb-6">
                   <div className="flex items-center gap-3 text-[#2d6b66]">
                     <CheckCircle size={24} className="text-[#00d9a3]" />
                     <span className="font-bold text-lg">You're Enrolled!</span>
                   </div>
                 </div>
-              ) : null}
+              )}
 
-              {/* CTA Button */}
+              {/* CTA Button - RESTORED ORIGINAL FUNCTIONALITY */}
               {!user ? (
                 <button
                   onClick={() => navigate("/login")}
                   className="w-full bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white font-bold py-5 px-8 rounded-2xl hover:from-[#48ADB7] hover:to-[#409891] transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
                 >
                   Login to Enroll
-                </button>
-              ) : enrollmentPending ? (
-                <button
-                  disabled
-                  className="w-full bg-gray-400 cursor-not-allowed text-white font-bold py-5 px-8 rounded-2xl text-lg"
-                >
-                  <span className="flex items-center justify-center gap-3">
-                    <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing...
-                  </span>
                 </button>
               ) : alreadyEnrolled ? (
                 <button
