@@ -31,55 +31,47 @@ router.post(
     }
 
     // 🎉 ---- Handle Successful Checkout ----
-    if (event.type === "checkout.session.completed") {
-      console.log("\n💳 Checkout session completed – enrolling user...");
+    if (
+  event.type === "checkout.session.completed" ||
+  event.type === "checkout.session.async_payment_succeeded"
+) {
+  console.log("\n💳 Checkout completed (or async) – enrolling user...");
 
-      const session = event.data.object;
+  const session = event.data.object;
 
-      const userId = session.metadata?.userId;
-      const courseId = session.metadata?.courseId;
+  const userId = session.metadata?.userId;
+  const courseId = session.metadata?.courseId;
 
-      console.log("🧩 Metadata:", { userId, courseId });
+  console.log("🧩 Metadata:", { userId, courseId });
 
-      if (!userId || !courseId) {
-        console.log("❌ Missing metadata. Aborting enrollment.");
-        return res.status(400).send("Missing metadata");
-      }
+  if (!userId || !courseId) {
+    console.log("❌ Missing metadata. Aborting enrollment.");
+    return res.status(400).send("Missing metadata");
+  }
 
-      try {
-        const user = await User.findById(userId);
-        const course = await Course.findById(courseId);
+  try {
+    const user = await User.findById(userId);
 
-        if (!user) {
-          console.log("❌ User not found:", userId);
-          return res.status(404).send("User not found");
-        }
-
-        if (!course) {
-          console.log("❌ Course not found:", courseId);
-          return res.status(404).send("Course not found");
-        }
-
-        // 🛑 Prevent duplicate enrollment
-        const alreadyEnrolled = user.enrolledCourses.some(
-          (c) => c.toString() === courseId.toString()
-        );
-
-        if (alreadyEnrolled) {
-          console.log("⚠️ User already enrolled. Skipping...");
-          return res.status(200).send("Already enrolled");
-        }
-
-        // 🎉 ENROLL USER
-        user.enrolledCourses.push(courseId);
-        await user.save();
-
-        console.log("✅ User successfully enrolled:", userId);
-      } catch (err) {
-        console.error("❌ Enrollment error:", err.message);
-        return res.status(500).send("Enrollment failed");
-      }
+    if (!user) {
+      console.log("❌ User not found:", userId);
+      return res.status(404).send("User not found");
     }
+
+    const already = user.enrolledCourses.includes(courseId);
+
+    if (already) {
+      console.log("⚠️ Already enrolled");
+      return res.status(200).send("Already enrolled");
+    }
+
+    user.enrolledCourses.push(courseId);
+    await user.save();
+
+    console.log("✅ Enrollment saved!");
+  } catch (err) {
+    console.error("❌ Enrollment error:", err);
+  }
+}
 
     res.json({ received: true });
   }
