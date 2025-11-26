@@ -8,7 +8,7 @@ dotenv.config();
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Keep express.raw() HERE in the route handler
+// ✅ Keep express.raw() HERE in the route handler
 router.post(
   "/",
   express.raw({ type: "application/json" }),

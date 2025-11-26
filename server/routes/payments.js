@@ -37,7 +37,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
               description: course.description,
               images: course.thumbnail || course.imageUrl ? [course.thumbnail || course.imageUrl] : [],
             },
-            unit_amount: priceInCents, // ✅ Now properly rounded integer
+            unit_amount: priceInCents,
           },
           quantity: 1,
         },
@@ -47,7 +47,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
         userId: userId.toString(),
         courseId: courseId.toString(),
       },
-      success_url: `${process.env.LEARNHUB_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.CLIENT_URL}/courses/${courseId}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/courses/${courseId}`,
     });
 
@@ -61,6 +61,7 @@ router.post("/create-checkout-session", protect, async (req, res) => {
   }
 });
 
+// ✅ SIMPLIFIED: Just verify payment, let webhook handle enrollment
 router.get("/verify-session", protect, async (req, res) => {
   try {
     const { session_id } = req.query;
@@ -72,29 +73,11 @@ router.get("/verify-session", protect, async (req, res) => {
     const session = await stripe.checkout.sessions.retrieve(session_id);
 
     if (session.payment_status === "paid") {
-      const courseId = session.metadata.courseId;
-      const userId = session.metadata.userId;
-
-      const course = await Course.findById(courseId);
-      if (!course) {
-        return res.status(404).json({ message: "Course not found" });
-      }
-
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Only push if not already enrolled
-      if (!user.enrolledCourses.some(id => id.equals(course._id))) {
-        user.enrolledCourses.push(course._id);
-        await user.save();
-        console.log(`✅ User ${user.email} enrolled in ${course.title} via verify-session`);
-      }
-
+      // ✅ Just return success - webhook handles enrollment
       res.json({ 
-        message: "Payment verified and course enrolled successfully!",
-        enrolled: true 
+        message: "Payment verified! Enrollment in progress...",
+        enrolled: true,
+        courseId: session.metadata.courseId
       });
     } else {
       res.status(400).json({ 
