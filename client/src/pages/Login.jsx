@@ -36,7 +36,7 @@ const Login = () => {
       localStorage.setItem("token", res.data.token);
       
       // Success - redirect to dashboard
-      window.location.href = "http://localhost:5174/dashboard";
+      window.location.href = "https://acadevo.vercel.app/";
     } catch (err) {
       console.error("Login error:", err);
       
