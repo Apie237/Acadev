@@ -17,8 +17,11 @@ const courseSchema = new mongoose.Schema(
     description: { type: String, required: true },
     price: { type: Number, required: true },
     published: { type: Boolean, default: false },
-    lessons: [lessonSchema], // ✅ embedded lessons
+    lessons: [lessonSchema],
     thumbnail: { type: String },
+    duration: { type: Number }, 
+    features: [{ type: String }], 
+    imageUrl: { type: String }, 
   },
   { timestamps: true }
 );

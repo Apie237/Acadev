@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import api from '../utils/api.js';
 import AcadevoLoader from './AcadevoLoader.jsx';
+import CourseCard from './CourseCard.jsx';
 
 const CourseSection = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -35,21 +36,6 @@ const CourseSection = () => {
     : courses.filter(course => course.category === activeFilter);
 
   const displayedCourses = showAll ? filteredCourses : filteredCourses.slice(0, 4);
-
-  const getCourseDuration = (lessons) => {
-    if (!lessons || lessons.length === 0) return 'Self-paced';
-    const totalHours = lessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0);
-    const months = Math.ceil(totalHours / 40);
-    return months > 0 ? `${months} Month${months > 1 ? 's' : ''}` : 'Self-paced';
-  };
-
-  const handleRegisterInterest = (courseId) => {
-    navigate(`/courses/${courseId}`);
-  };
-
-  const handleLearnMore = (courseId) => {
-    navigate(`/courses/${courseId}`);
-  };
 
   if (loading) return <AcadevoLoader/>
 
@@ -92,56 +78,7 @@ const CourseSection = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {displayedCourses.map((course) => (
-              <div
-                key={course._id}
-                className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
-              >
-                {/* Thumbnail */}
-                <div className="relative h-48 overflow-hidden bg-gray-200">
-                  {course.thumbnail || course.imageUrl ? (
-                    <img
-                      src={course.thumbnail || course.imageUrl}
-                      alt={course.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#409891] to-[#48ADB7]">
-                      <span className="text-white text-4xl font-bold">
-                        {course.title.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  {!course.published && (
-                    <span className="absolute top-3 left-3 bg-yellow-400 text-[#1F2937] text-xs font-semibold px-3 py-1 rounded-full">
-                      Coming soon
-                    </span>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-xl font-bold text-[#1F2937] mb-2 line-clamp-2">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {getCourseDuration(course.lessons)}
-                  </p>
-
-                  {/* Buttons */}
-                  <button 
-                    onClick={() => handleRegisterInterest(course._id)}
-                    className="w-full bg-gradient-to-r from-[#409891] to-[#48ADB7] hover:from-[#48ADB7] hover:to-[#409891] text-white font-semibold py-3 rounded-xl mb-3 transition-all duration-300 shadow-md hover:shadow-lg"
-                  >
-                    Register Interest
-                  </button>
-                  <button 
-                    onClick={() => handleLearnMore(course._id)}
-                    className="w-full text-[#48ADB7] font-semibold hover:text-[#409891] transition-colors duration-300"
-                  >
-                    Learn more
-                  </button>
-                </div>
-              </div>
+              <CourseCard key={course._id} course={course} />
             ))}
           </div>
         )}
