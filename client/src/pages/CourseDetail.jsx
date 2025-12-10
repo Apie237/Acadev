@@ -65,7 +65,7 @@ useEffect(() => {
   }
 }, [id]);
 
-  const learnHubUrl = "https://learnhubacadevo.vercel.app";
+  const learnHubUrl = "https://learnhubacadevo.vercel.app/";
 
   const handleGoToDashboard = () => {
     const token = localStorage.getItem("token");
