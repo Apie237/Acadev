@@ -1,10 +1,15 @@
-// controllers/post.controller.js
+// routes/post.js
+import express from "express";
+import { protect } from "../middleware/auth.js";
 import { v2 as cloudinary } from "cloudinary";
 import User from "../models/User.js";
 import Post from "../models/Post.js";
 import Notification from "../models/Notification.js";
 
-export const createPost = async (req, res) => {
+const router = express.Router();
+
+// Create Post
+router.post("/create", protect, async (req, res) => {
   try {
     const { text, courseId } = req.body;
     let { img } = req.body;
@@ -40,11 +45,12 @@ export const createPost = async (req, res) => {
     res.status(200).json(newPost);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
-    console.log("Error in create post controller: ", error);
+    console.log("Error in create post: ", error);
   }
-};
+});
 
-export const deletePost = async (req, res) => {
+// Delete Post
+router.delete("/:id", protect, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) {
@@ -63,12 +69,13 @@ export const deletePost = async (req, res) => {
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
-    console.log("Error in deletePost controller: ", error);
+    console.log("Error in deletePost: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+});
 
-export const commentOnPost = async (req, res) => {
+// Comment on Post
+router.post("/comment/:id", protect, async (req, res) => {
   try {
     const postId = req.params.id;
     const userId = req.user._id;
@@ -100,12 +107,13 @@ export const commentOnPost = async (req, res) => {
 
     res.status(201).json(post);
   } catch (error) {
-    console.log("Error in commentOnPost Controller: ", error);
+    console.log("Error in commentOnPost: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+});
 
-export const likeUnlikePost = async (req, res) => {
+// Like/Unlike Post
+router.post("/like/:id", protect, async (req, res) => {
   try {
     const userId = req.user._id;
     const { id: postId } = req.params;
@@ -138,12 +146,13 @@ export const likeUnlikePost = async (req, res) => {
       res.status(200).json(updatedLikes);
     }
   } catch (error) {
-    console.log("Error in likeUnlikePost controller: ", error);
+    console.log("Error in likeUnlikePost: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+});
 
-export const getCoursePosts = async (req, res) => {
+// Get Course Posts
+router.get("/course/:courseId", protect, async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user._id;
@@ -167,12 +176,13 @@ export const getCoursePosts = async (req, res) => {
 
     res.status(200).json(posts);
   } catch (error) {
-    console.log("Error in getCoursePosts Controller: ", error);
+    console.log("Error in getCoursePosts: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+});
 
-export const getUserPosts = async (req, res) => {
+// Get User Posts
+router.get("/user/:userId", protect, async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -192,7 +202,9 @@ export const getUserPosts = async (req, res) => {
 
     res.status(200).json(posts);
   } catch (error) {
-    console.log("Error in getUserPosts controller: ", error);
+    console.log("Error in getUserPosts: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+});
+
+export default router;
