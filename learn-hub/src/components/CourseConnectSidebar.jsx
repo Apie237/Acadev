@@ -1,0 +1,94 @@
+import { Hash, Globe, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+
+export default function CourseConnectSidebar({ 
+  enrolledCourses, 
+  selectedCourse, 
+  setSelectedCourse,
+  open,
+  setOpen 
+}) {
+  return (
+    <div
+      className={`${
+        open ? "w-64" : "w-0"
+      } bg-white border-r border-[#BAD0CC]/30 h-screen transition-all duration-300 flex flex-col shadow-lg fixed top-0 left-0 z-40 overflow-hidden`}
+    >
+      {/* Header */}
+      <div className="p-4 border-b border-[#BAD0CC]/30 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-lg flex items-center justify-center">
+            <Hash className="text-white" size={16} />
+          </div>
+          <h2 className="font-bold text-lg text-[#2d6b66]">Channels</h2>
+        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-1.5 hover:bg-[#BAD0CC]/20 rounded-lg transition-all"
+        >
+          {open ? (
+            <ChevronLeft className="text-[#409891]" size={18} />
+          ) : (
+            <ChevronRight className="text-[#409891]" size={18} />
+          )}
+        </button>
+      </div>
+
+      {/* General Channel */}
+      <div className="p-3">
+        <div
+          onClick={() => setSelectedCourse(null)}
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+            selectedCourse === null
+              ? "bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white"
+              : "text-gray-700 hover:bg-[#BAD0CC]/20"
+          }`}
+        >
+          <Globe size={18} />
+          <span className="font-medium text-sm">General</span>
+        </div>
+      </div>
+
+      {/* Course Channels */}
+      <div className="flex-1 overflow-y-auto px-3 pb-3">
+        <div className="mb-2">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide px-3 py-2">
+            Course Channels
+          </p>
+        </div>
+        <div className="space-y-1">
+          {enrolledCourses.map((course) => (
+            <div
+              key={course._id}
+              onClick={() => setSelectedCourse(course._id)}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all group ${
+                selectedCourse === course._id
+                  ? "bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white"
+                  : "text-gray-700 hover:bg-[#BAD0CC]/20"
+              }`}
+            >
+              <Hash size={16} className={selectedCourse === course._id ? "" : "text-gray-400"} />
+              <span className="font-medium text-sm line-clamp-1">{course.title}</span>
+            </div>
+          ))}
+        </div>
+
+        {enrolledCourses.length === 0 && (
+          <div className="text-center py-8 px-4">
+            <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-xs text-gray-500">No courses enrolled yet</p>
+          </div>
+        )}
+      </div>
+
+      {/* Toggle Button (visible when closed) */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="absolute top-4 -right-10 p-2 bg-white rounded-r-lg shadow-md hover:bg-[#BAD0CC]/20 transition-all border border-l-0 border-[#BAD0CC]/30"
+        >
+          <ChevronRight className="text-[#409891]" size={18} />
+        </button>
+      )}
+    </div>
+  );
+}

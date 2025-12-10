@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   User,
+  MessageCircle,
 } from "lucide-react";
 
 export default function Sidebar({ onLogout, open, setOpen }) {
@@ -18,6 +19,7 @@ export default function Sidebar({ onLogout, open, setOpen }) {
     { to: "/dashboard", label: "Dashboard", icon: Home },
     { to: "/my-courses", label: "My Courses", icon: BookOpen },
     { to: "/progress", label: "My Progress", icon: BarChart2 },
+    { to: "/course-connect", label: "CourseConnect", icon: MessageCircle },
     { to: "/settings", label: "Settings", icon: Settings },
   ];
 

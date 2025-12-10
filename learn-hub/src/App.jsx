@@ -10,16 +10,16 @@ import MyProgress from "./pages/MyProgress";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BeaconChat from "./components/BeaconChat";
+import CourseConnect from "./pages/CourseConnect";
 
 // Layout wrapper for authenticated routes
 function AuthenticatedLayout({ children, onLogout, sidebarOpen, setSidebarOpen }) {
   return (
     <div className="flex min-h-screen bg-[#E6E5E1]">
       <Sidebar onLogout={onLogout} open={sidebarOpen} setOpen={setSidebarOpen} />
-      <main 
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? 'ml-72' : 'ml-20'
-        } min-h-screen relative`}
+      <main
+        className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-72' : 'ml-20'
+          } min-h-screen relative`}
       >
         {children}
         <BeaconChat />
@@ -41,37 +41,43 @@ export default function App() {
   return (
     <>
       <TokenHandler />
-      
+
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
-        
+
         {/* Protected routes with layout */}
         <Route path="/dashboard" element={
           <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
             <Dashboard />
           </AuthenticatedLayout>
         } />
-        
+
         <Route path="/my-courses" element={
           <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
             <MyCourses />
           </AuthenticatedLayout>
         } />
-        
+
         <Route path="/courses/:courseId" element={
           <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
             <LessonPlayer />
           </AuthenticatedLayout>
         } />
-        
+
         <Route path="/progress" element={
           <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
             <MyProgress />
           </AuthenticatedLayout>
         } />
-        
+
+        <Route path="/course-connect" element={
+          <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+            <CourseConnect />
+          </AuthenticatedLayout>
+        } />
+
         <Route path="/settings" element={
           <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
             <div className="p-6">
@@ -90,7 +96,7 @@ export default function App() {
             </div>
           </AuthenticatedLayout>
         } />
-        
+
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>

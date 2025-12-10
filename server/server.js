@@ -11,6 +11,8 @@ import paymentRoutes from "./routes/payments.js";
 import userRoutes from "./routes/user.js";
 import webhookRoutes from "./routes/webhook.js";
 import chatbotRoutes from "./routes/chatbot.js";
+import postRoutes from "./routes/post.js";
+import notificationRoutes from "./routes/notification.js";
 
 dotenv.config();
 connectDB();
@@ -43,6 +45,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
