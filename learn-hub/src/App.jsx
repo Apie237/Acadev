@@ -72,11 +72,11 @@ export default function App() {
           </AuthenticatedLayout>
         } />
 
-        <Route path="/course-connect" element={
-          <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-            <CourseConnect />
-          </AuthenticatedLayout>
-        } />
+        {/* CourseConnect with its OWN sidebar - NO AuthenticatedLayout wrapper */}
+        <Route 
+          path="/course-connect" 
+          element={user ? <CourseConnect onLogout={handleLogout} /> : <Navigate to="/login" />} 
+        />
 
         <Route path="/settings" element={
           <AuthenticatedLayout onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>

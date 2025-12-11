@@ -1,10 +1,11 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { MessageCircle, Users, BookOpen, TrendingUp, ChevronRight, Hash, Globe, ChevronLeft } from "lucide-react";
+import { MessageCircle, Users, BookOpen, TrendingUp, ChevronRight, Hash, Globe, ChevronLeft, LogOut, Home } from "lucide-react";
 import api from "../utils/api";
+import BeaconChat from "../components/BeaconChat";
 
-export default function CourseConnect() {
+export default function CourseConnect({ onLogout }) {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -56,30 +57,44 @@ export default function CourseConnect() {
         } bg-white border-r border-[#BAD0CC]/30 h-screen transition-all duration-300 flex flex-col shadow-lg`}
       >
         {/* Header */}
-        <div className="p-4 border-b border-[#BAD0CC]/30 flex items-center justify-between">
-          {sidebarOpen ? (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-lg flex items-center justify-center">
-                  <Hash className="text-white" size={16} />
+        <div className="p-4 border-b border-[#BAD0CC]/30">
+          <div className="flex items-center justify-between">
+            {sidebarOpen ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-lg flex items-center justify-center">
+                    <Hash className="text-white" size={16} />
+                  </div>
+                  <h2 className="font-bold text-lg text-[#2d6b66]">Channels</h2>
                 </div>
-                <h2 className="font-bold text-lg text-[#2d6b66]">Channels</h2>
-              </div>
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-1.5 hover:bg-[#BAD0CC]/20 rounded-lg transition-all"
+                >
+                  <ChevronLeft className="text-[#409891]" size={18} />
+                </button>
+              </>
+            ) : (
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-1.5 hover:bg-[#BAD0CC]/20 rounded-lg transition-all"
+                className="w-full flex justify-center p-1.5 hover:bg-[#BAD0CC]/20 rounded-lg transition-all"
               >
-                <ChevronLeft className="text-[#409891]" size={18} />
+                <ChevronRight className="text-[#409891]" size={18} />
               </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-full flex justify-center p-1.5 hover:bg-[#BAD0CC]/20 rounded-lg transition-all"
-            >
-              <ChevronRight className="text-[#409891]" size={18} />
-            </button>
-          )}
+            )}
+          </div>
+        </div>
+
+        {/* Back to Dashboard Button */}
+        <div className="p-3 border-b border-[#BAD0CC]/30">
+          <button
+            onClick={() => navigate('/dashboard')}
+            title={!sidebarOpen ? "Back to Dashboard" : ""}
+            className={`flex items-center w-full ${sidebarOpen ? 'gap-3 px-3' : 'justify-center'} py-2 rounded-lg cursor-pointer transition-all text-gray-700 hover:bg-[#BAD0CC]/20`}
+          >
+            <Home size={18} />
+            {sidebarOpen && <span className="font-medium text-sm">Back to Dashboard</span>}
+          </button>
         </div>
 
         {/* General Channel */}
@@ -132,10 +147,22 @@ export default function CourseConnect() {
             </div>
           )}
         </div>
+
+        {/* Logout Button */}
+        <div className="p-3 border-t border-[#BAD0CC]/30 mt-auto">
+          <button
+            onClick={onLogout}
+            title={!sidebarOpen ? "Logout" : ""}
+            className={`flex items-center w-full ${sidebarOpen ? 'gap-3 px-3' : 'justify-center'} py-2 rounded-lg cursor-pointer transition-all text-gray-700 hover:bg-red-50 hover:text-red-600`}
+          >
+            <LogOut size={18} />
+            {sidebarOpen && <span className="font-medium text-sm">Logout</span>}
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto relative">
         {selectedCourse ? (
           <CourseFeed courseId={selectedCourse} />
         ) : (
@@ -223,7 +250,7 @@ export default function CourseConnect() {
                     Enroll in courses to start connecting with fellow learners!
                   </p>
                   <button
-                    onClick={() => window.location.href = "https://acadev.vercel.app/courses"}
+                    onClick={() => window.location.href = "http://localhost:5173/courses"}
                     className="bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white font-bold px-8 py-3 rounded-xl hover:shadow-lg transition-all"
                   >
                     Browse Courses
@@ -234,6 +261,9 @@ export default function CourseConnect() {
           </div>
         )}
       </div>
+      
+      {/* BeaconChat */}
+      <BeaconChat />
     </div>
   );
 }
