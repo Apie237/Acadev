@@ -1,179 +1,189 @@
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import { MessageCircle, Users, BookOpen, TrendingUp, ChevronRight } from "lucide-react";
-import api from "../utils/api";
-import CourseConnectSidebar from "../components/CourseConnectSidebar";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  Home,
+  BookOpen,
+  BarChart2,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  User,
+  MessageCircle,
+} from "lucide-react";
 
-export default function CourseConnect() {
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+export default function Sidebar({ onLogout, open, setOpen }) {
+  const location = useLocation();
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-
-    const fetchEnrolledCourses = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const res = await api.get(`/users/${user._id}/enrolled`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setEnrolledCourses(res.data);
-      } catch (err) {
-        console.error("Error fetching enrolled courses:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEnrolledCourses();
-  }, [user, navigate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#E6E5E1] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#409891] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-lg font-semibold text-[#2d6b66]">Loading CourseConnect...</p>
-        </div>
-      </div>
-    );
-  }
+  const links = [
+    { to: "/dashboard", label: "Dashboard", icon: Home },
+    { to: "/my-courses", label: "My Courses", icon: BookOpen },
+    { to: "/progress", label: "My Progress", icon: BarChart2 },
+    { to: "/course-connect", label: "CourseConnect", icon: MessageCircle },
+    { to: "/settings", label: "Settings", icon: Settings },
+  ];
 
   return (
-    <div className="flex h-screen bg-[#E6E5E1]">
-      {/* CourseConnect Sidebar */}
-      <CourseConnectSidebar
-        enrolledCourses={enrolledCourses}
-        selectedCourse={selectedCourse}
-        setSelectedCourse={setSelectedCourse}
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
+    <>
+      <style jsx>{`
+        @keyframes oscillate {
+          0%, 100% {
+            transform: translateX(0) scale(1);
+          }
+          25% {
+            transform: translateX(3px) scale(1.02);
+          }
+          75% {
+            transform: translateX(-3px) scale(1.02);
+          }
+        }
 
-      {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
-        {selectedCourse ? (
-          <CourseFeed courseId={selectedCourse} />
-        ) : (
-          <div className="min-h-screen bg-[#E6E5E1] p-6">
-            <div className="max-w-6xl mx-auto">
-              {/* Header */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-[#2d6b66] mb-2">Welcome to CourseConnect</h1>
-                <p className="text-gray-600">Connect with fellow learners in your courses</p>
+        @keyframes pulse-glow {
+          0%, 100% {
+            opacity: 0.5;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+
+        .oscillate-hover:hover .oscillate-bg {
+          animation: oscillate 0.8s ease-in-out infinite;
+        }
+
+        .oscillate-hover:hover .oscillate-icon {
+          animation: oscillate 0.6s ease-in-out infinite;
+        }
+
+        .glow-pulse {
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Sidebar - Fixed Position */}
+      <div
+        className={`${
+          open ? "w-72" : "w-20"
+        } bg-white border-r border-[#BAD0CC]/30 h-screen transition-all duration-300 flex flex-col shadow-lg fixed top-0 left-0 z-50`}
+      >
+        {/* Header with Toggle */}
+        <div className="p-6 border-b border-[#BAD0CC]/30">
+          <div className="flex items-center justify-between">
+            {open ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-xl flex items-center justify-center shadow-md">
+                  <BookOpen className="text-white" size={20} />
+                </div>
+                <h1 className="font-bold text-2xl bg-gradient-to-r from-[#409891] to-[#48ADB7] bg-clip-text text-transparent">
+                  LearnHub
+                </h1>
               </div>
-
-              {/* Stats Grid */}
-              <div className="grid md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-xl flex items-center justify-center">
-                      <BookOpen className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Active Courses</p>
-                      <p className="text-2xl font-bold text-[#2d6b66]">{enrolledCourses.length}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                      <Users className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Fellow Students</p>
-                      <p className="text-2xl font-bold text-[#2d6b66]">-</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                      <MessageCircle className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Total Posts</p>
-                      <p className="text-2xl font-bold text-[#2d6b66]">-</p>
-                    </div>
-                  </div>
-                </div>
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-xl flex items-center justify-center shadow-md">
+                <BookOpen className="text-white" size={20} />
               </div>
-
-              {/* Courses Overview */}
-              {enrolledCourses.length > 0 ? (
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                  <h2 className="text-xl font-bold text-[#2d6b66] mb-4">Your Course Communities</h2>
-                  <div className="space-y-3">
-                    {enrolledCourses.map((course) => (
-                      <div
-                        key={course._id}
-                        onClick={() => setSelectedCourse(course._id)}
-                        className="flex items-center justify-between p-4 bg-gradient-to-br from-gray-50 to-white rounded-lg cursor-pointer hover:shadow-md transition-all border border-gray-200 hover:border-[#409891] group"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <BookOpen className="text-white" size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-[#2d6b66] group-hover:text-[#409891] transition-colors">
-                              {course.title}
-                            </h3>
-                            <p className="text-sm text-gray-600">{course.category}</p>
-                          </div>
-                        </div>
-                        <ChevronRight className="text-[#409891] group-hover:translate-x-2 transition-transform" size={20} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            )}
+            <button
+              onClick={() => setOpen(!open)}
+              className="p-2 hover:bg-[#BAD0CC]/20 rounded-lg transition-all duration-300 hover:scale-110 hover:rotate-180"
+            >
+              {open ? (
+                <X className="text-[#409891]" size={20} />
               ) : (
-                <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
-                  <div className="w-20 h-20 bg-[#BAD0CC]/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle size={40} className="text-[#409891]" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-[#2d6b66] mb-2">No Courses Yet</h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    Enroll in courses to start connecting with fellow learners!
-                  </p>
-                  <button
-                    onClick={() => window.location.href = "http://localhost:5173/courses"}
-                    className="bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white font-bold px-8 py-3 rounded-xl hover:shadow-lg transition-all"
-                  >
-                    Browse Courses
-                  </button>
-                </div>
+                <Menu className="text-[#409891]" size={20} />
               )}
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {links.map((link) => {
+            const active = location.pathname === link.to;
+            const Icon = link.icon;
+            
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group relative overflow-hidden oscillate-hover ${
+                  active
+                    ? "bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white shadow-lg"
+                    : "text-gray-700 hover:bg-[#BAD0CC]/20"
+                }`}
+              >
+                {/* Oscillating background effect on hover */}
+                {!active && (
+                  <div className="oscillate-bg absolute inset-0 bg-gradient-to-r from-[#409891]/10 to-[#48ADB7]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                )}
+                
+                {/* Glow effect for active item */}
+                {active && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#409891] to-[#48ADB7] opacity-20 glow-pulse"></div>
+                )}
+                
+                {/* Icon with scale and rotation animation */}
+                <div className={`oscillate-icon relative z-10 transition-all duration-300 ${
+                  active ? "scale-110" : "group-hover:scale-125 group-hover:rotate-12"
+                }`}>
+                  <Icon size={20} />
+                </div>
+                
+                {/* Label with slide effect */}
+                {open && (
+                  <span className={`relative z-10 transition-all duration-300 ${
+                    active ? "font-semibold" : "group-hover:translate-x-2"
+                  }`}>
+                    {link.label}
+                  </span>
+                )}
+                
+                {/* Active indicator dot */}
+                {active && !open && (
+                  <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-white rounded-l-full"></div>
+                )}
+
+                {/* Active indicator line for expanded */}
+                {active && open && (
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full shadow-lg"></div>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+       
+        {/* Compact User Avatar when closed */}
+        {!open && (
+          <div className="px-2 py-3 border-t border-[#BAD0CC]/30">
+            <div className="w-12 h-12 mx-auto bg-gradient-to-br from-[#409891] to-[#48ADB7] rounded-full flex items-center justify-center text-white font-bold shadow-md hover:scale-110 transition-transform duration-300 cursor-pointer">
+              <User size={24} />
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
 
-// Placeholder for Course Feed Component
-function CourseFeed({ courseId }) {
-  return (
-    <div className="min-h-screen bg-[#E6E5E1] p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
-          <MessageCircle className="w-16 h-16 text-[#409891] mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#2d6b66] mb-2">Course Feed</h2>
-          <p className="text-gray-600">Post feed for this course will appear here</p>
+        {/* Logout Button */}
+        <div className="p-4 border-t border-[#BAD0CC]/30">
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 group relative overflow-hidden oscillate-hover"
+          >
+            {/* Oscillating background */}
+            <div className="oscillate-bg absolute inset-0 bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            {/* Icon with bounce effect */}
+            <div className="oscillate-icon relative z-10 transition-all duration-300 group-hover:scale-125 group-hover:-rotate-12">
+              <LogOut size={20} />
+            </div>
+            
+            {open && (
+              <span className="relative z-10 transition-all duration-300 group-hover:translate-x-2 font-medium">
+                Logout
+              </span>
+            )}
+          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
