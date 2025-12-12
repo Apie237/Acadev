@@ -4,7 +4,7 @@ import { MessageCircle, Hash } from "lucide-react";
 import api from "../utils/api";
 import PostCard from "../components/PostCard";
 import CreatePost from "../components/CreatePost";
-import CourseFeedSkeleton from "../components/skeletons/CourseFeedSkeleton";
+import CourseFeedSkeleton from "./skeletons/CourseFeedSkeleton";
 
 const CourseFeed = ({ courseId }) => {
   const { user } = useContext(AuthContext);

@@ -8,7 +8,6 @@ import GeneralFeed from "../components/GeneralFeed";
 import CourseFeed from "../components/CourseFeed";
 import ChannelSidebarSkeleton from "../components/ChannelSidebarSkeleton";
 import GeneralFeedSkeleton from "../components/skeletons/GeneralFeedSkeleton";
-
 const CourseConnect = ({ onLogout }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
