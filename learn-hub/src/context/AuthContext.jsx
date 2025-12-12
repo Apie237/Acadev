@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import api from "../utils/api";
+import AcadevoLoader from "../components/AcadevoLoader";
 
 export const AuthContext = createContext();
 
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }) => {
     }));
   };
 
-  if (loading) return <p className="p-6">Loading...</p>;
+  if (loading) return <AcadevoLoader/>
 
   return (
     <AuthContext.Provider value={{ user, setUser, updateCourseProgress }}>
