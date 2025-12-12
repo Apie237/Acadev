@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ProgressSkeleton from "../components/skeletons/ProgressSkeleton";
 import { 
   BookOpen, 
   TrendingUp, 
@@ -78,12 +79,7 @@ export default function ProgressPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E6E5E1] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#409891] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-lg font-semibold text-[#2d6b66]">Loading your progress...</p>
-        </div>
-      </div>
+     <ProgressSkeleton/>
     );
   }
 

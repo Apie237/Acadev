@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import {
   BookOpen,
   TrendingUp,
@@ -102,14 +103,7 @@ const Dashboard = () => {
   if (!user) return null;
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#E6E5E1] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#409891] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-lg font-semibold text-[#2d6b66]">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton/>
   }
 
   if (error) {
