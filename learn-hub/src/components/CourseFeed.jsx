@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { MessageCircle, Hash } from "lucide-react";
-import api from "../../../client/src/utils/api";
-import PostCard from "./PostCard";
-import CreatePost from "./CreatePost";
+import api from "../utils/api";
+import PostCard from "../components/PostCard";
+import CreatePost from "../components/CreatePost";
+import CourseFeedSkeleton from "../components/skeletons/CourseFeedSkeleton";
 
 const CourseFeed = ({ courseId }) => {
   const { user } = useContext(AuthContext);
@@ -87,14 +88,7 @@ const CourseFeed = ({ courseId }) => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#E6E5E1] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#409891] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-lg font-semibold text-[#2d6b66]">Loading posts...</p>
-        </div>
-      </div>
-    );
+    return <CourseFeedSkeleton />;
   }
 
   return (

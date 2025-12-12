@@ -327,7 +327,7 @@ export default function ProgressPage() {
               You've completed all your courses! You're a learning champion!
             </p>
             <button
-              onClick={() => window.location.href = "http://localhost:5173/courses"}
+              onClick={() => window.location.href =  "https://acadevo.vercel.app/courses"}
               className="bg-white text-green-600 font-bold px-8 py-3 rounded-xl hover:shadow-lg transition-all"
             >
               Explore More Courses

@@ -6,6 +6,8 @@ import BeaconChat from "../components/BeaconChat";
 import ChannelSidebar from "../components/ChannelSidebar";
 import GeneralFeed from "../components/GeneralFeed";
 import CourseFeed from "../components/CourseFeed";
+import ChannelSidebarSkeleton from "../components/ChannelSidebarSkeleton";
+import GeneralFeedSkeleton from "../components/skeletons/GeneralFeedSkeleton";
 
 const CourseConnect = ({ onLogout }) => {
   const { user } = useContext(AuthContext);
@@ -41,10 +43,10 @@ const CourseConnect = ({ onLogout }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E6E5E1] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#409891] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-lg font-semibold text-[#2d6b66]">Loading CourseConnect...</p>
+      <div className="flex h-screen bg-[#E6E5E1] relative">
+        <ChannelSidebarSkeleton />
+        <div className="flex-1 overflow-y-auto relative">
+          <GeneralFeedSkeleton />
         </div>
       </div>
     );

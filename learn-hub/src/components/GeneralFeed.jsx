@@ -86,7 +86,7 @@ const GeneralFeed = ({ enrolledCourses, setSelectedCourse }) => {
               Enroll in courses to start connecting with fellow learners!
             </p>
             <button
-              onClick={() => (window.location.href = "http://localhost:5173/courses")}
+              onClick={() => (window.location.href = "https://acadevo.vercel.app/courses")}
               className="bg-gradient-to-r from-[#409891] to-[#48ADB7] text-white font-bold px-8 py-3 rounded-xl hover:shadow-lg transition-all"
             >
               Browse Courses
