@@ -58,9 +58,9 @@ useEffect(() => {
         clearInterval(checkEnrollment);
         console.log("⏰ Enrollment check timeout");
       }
-    }, 2000); // Check every 2 seconds
+    }, 2000); 
     
-    // Clean up interval on unmount
+    
     return () => clearInterval(checkEnrollment);
   }
 }, [id]);
