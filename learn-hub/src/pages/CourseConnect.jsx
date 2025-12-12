@@ -6,7 +6,7 @@ import BeaconChat from "../components/BeaconChat";
 import ChannelSidebar from "../components/ChannelSidebar";
 import GeneralFeed from "../components/GeneralFeed";
 import CourseFeed from "../components/CourseFeed";
-import ChannelSidebarSkeleton from "../components/ChannelSidebarSkeleton";
+import ChannelSidebarSkeleton from "../components/skeletons/ChannelSidebarSkeleton";
 import GeneralFeedSkeleton from "../components/skeletons/GeneralFeedSkeleton";
 const CourseConnect = ({ onLogout }) => {
   const { user } = useContext(AuthContext);
