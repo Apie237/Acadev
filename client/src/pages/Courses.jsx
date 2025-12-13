@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Filter, X } from "lucide-react";
 import api from "../utils/api";
 import CourseCard from "../components/CourseCard";
+import CoursesPageSkeleton from "../components/skeletons/CoursePageSkeleton";
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
