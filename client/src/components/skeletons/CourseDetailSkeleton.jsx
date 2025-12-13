@@ -1,3 +1,4 @@
+import React from "react";
 const CourseDetailSkeleton = () => {
   return (
     <div className="min-h-screen bg-[#E6E5E1]">
