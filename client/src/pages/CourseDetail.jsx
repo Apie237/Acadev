@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Clock, BookOpen, CheckCircle, PlayCircle, Users, Award, TrendingUp, ArrowLeft } from "lucide-react";
 import api from "../utils/api.js";
+import CourseDetailSkeleton from "../components/skeletons/CourseDetailSkeleton.jsx";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -105,15 +106,8 @@ useEffect(() => {
   };
 
   if (!course) {
-    return (
-      <div className="min-h-screen bg-[#E6E5E1] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#409891] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-xl font-semibold text-[#2d6b66]">Loading course...</p>
-        </div>
-      </div>
-    );
-  }
+  return <CourseDetailSkeleton />;
+}
 
   const alreadyEnrolled = user?.enrolledCourses?.some((c) => c._id === course._id);
 

@@ -9,6 +9,7 @@ const CoursesPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true)
 
   const categories = [
     "Career",
@@ -20,12 +21,14 @@ const CoursesPage = () => {
   ];
 
   useEffect(() => {
+    setLoading(true);
     api.get("/courses")
       .then(res => {
         setCourses(res.data);
         setFilteredCourses(res.data);
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -66,6 +69,10 @@ const CoursesPage = () => {
     setSelectedCategories([]);
   };
 
+
+  if (loading) {
+    return <CoursesPageSkeleton />;
+  }
   return (
     <div className="min-h-screen bg-[#E6E5E1]">
       {/* Header Section */}
