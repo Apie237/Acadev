@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Filter, X } from "lucide-react";
 import api from "../utils/api";
 import CourseCard from "../components/CourseCard";
@@ -6,11 +6,10 @@ import CoursesPageSkeleton from "../components/skeletons/CoursePageSkeleton";
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
-  const [filteredCourses, setFilteredCourses] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true); 
 
   const categories = [
     "Career",
@@ -21,18 +20,25 @@ const CoursesPage = () => {
     "Tech"
   ];
 
+  // ✅ Fetch courses on mount with loading state
   useEffect(() => {
-    setLoading(true);
-    api.get("/courses")
-      .then(res => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/courses");
         setCourses(res.data);
-        setFilteredCourses(res.data);
-      })
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
   }, []);
 
-  useEffect(() => {
+  // ✅ Use useMemo to prevent unnecessary re-filtering
+  const filteredCourses = useMemo(() => {
     let filtered = courses;
 
     // Filter by categories
@@ -44,14 +50,15 @@ const CoursesPage = () => {
 
     // Filter by search term
     if (searchTerm.trim()) {
+      const lowerSearch = searchTerm.toLowerCase();
       filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchTerm.toLowerCase())
+        course.title.toLowerCase().includes(lowerSearch) ||
+        course.description.toLowerCase().includes(lowerSearch)
       );
     }
 
-    setFilteredCourses(filtered);
-  }, [selectedCategories, searchTerm, courses]);
+    return filtered;
+  }, [courses, selectedCategories, searchTerm]);
 
   const toggleCategory = (category) => {
     setSelectedCategories(prev =>
@@ -70,10 +77,11 @@ const CoursesPage = () => {
     setSelectedCategories([]);
   };
 
-
+  // ✅ Show skeleton while loading
   if (loading) {
     return <CoursesPageSkeleton />;
   }
+
   return (
     <div className="min-h-screen bg-[#E6E5E1]">
       {/* Header Section */}
@@ -223,4 +231,5 @@ const CoursesPage = () => {
     </div>
   );
 };
-export default CoursesPage
+
+export default CoursesPage;
